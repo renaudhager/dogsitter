@@ -1,7 +1,9 @@
 package pull
 
 import (
-  "io/ioutil"
+	"bytes"
+	"encoding/json"
+	"io/ioutil"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -28,40 +30,57 @@ var PullCmd = cli.Command{
 func pull(c *cli.Context) (err error) {
 
 	log := confLogging(c.GlobalString("l"))
-  dashboardID := c.String("id")
+	dashboardID := c.String("id")
 
 	log.Info("Pulling dashboard ", dashboardID)
 
-  query := c.GlobalString("dh") + "/api/v1/dashboard/" + dashboardID + "?api_key=" + c.GlobalString("api-key") + "&application_key=" + c.GlobalString("app-key")
+	query := c.GlobalString("dh") + "/api/v1/dashboard/" + dashboardID + "?api_key=" + c.GlobalString("api-key") + "&application_key=" + c.GlobalString("app-key")
 
 	resp, err := http.Get(query)
 	if err != nil {
-    log.Fatal("Error connectiong to ", query)
+		log.Fatal("Error connectiong to ", query)
 	}
 	defer resp.Body.Close()
 
-  if resp.StatusCode == 200 {
-    body, err := ioutil.ReadAll(resp.Body)
+	if resp.StatusCode == 200 {
+		body, err := ioutil.ReadAll(resp.Body)
 
-    if err != nil {
-      log.Fatal("Unable to read body of the repsonse")
-    }
+		if err != nil {
+			log.Fatal("Unable to read body of the repsonse")
+		}
 
-    dumpDashboard(string(body), c.String("o"))
+		dumpDashboard(string(body), c.String("o"))
 
-  } else {
-    log.Error("Returned code is not 200, it's ", resp.StatusCode)
-  }
+	} else {
+		log.Error("Returned code is not 200, it's ", resp.StatusCode)
+	}
 
 	return nil
 }
 
 func dumpDashboard(content string, filepath string) {
 
-  err := ioutil.WriteFile(filepath, []byte(content), 0600)
+	var (
+		output     []byte
+		prettyJSON bytes.Buffer
+	)
+
+  // Try to beautify JSON payload
+  // if this failed dump the raw payload
+	err := json.Indent(&prettyJSON, []byte(content), "", "\t")
+	if err == nil {
+		output = prettyJSON.Bytes()
+	} else {
+		log.Warn("JSON parse error: ", err)
+		output = []byte(content)
+	}
+
+	err = ioutil.WriteFile(filepath, output, 0600)
 	if err != nil {
 		log.Error("Error when writing to ", filepath)
-	}
+	} else {
+    log.Info("Dashboard dumped into ",filepath)
+  }
 
 }
 

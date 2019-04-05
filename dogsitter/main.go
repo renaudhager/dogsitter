@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dogsitter/pull"
+	"dogsitter/dogsitter/pull"
 	"os"
 
 	log "github.com/sirupsen/logrus"
