@@ -12,7 +12,7 @@ var version string
 
 // main function
 func main() {
-	version = "alpha"
+	// version = "alpha"
 	app := cli.NewApp()
 	app.Name = "dogsitter"
 	app.HelpName = "CLI tool to import and export Datadog dashboard."

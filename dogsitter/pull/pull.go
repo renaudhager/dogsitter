@@ -3,7 +3,9 @@ package pull
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	// "log"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -22,87 +24,89 @@ var PullCmd = cli.Command{
 		},
 		cli.StringFlag{
 			Name:  "o, output",
-			Usage: "output file for JSON payload. If not specified title of dashboard will be used as filename(space will be replace by _).",
+			Usage: "output file for JSON payload.",
+			Value: "stdout",
 		},
 	},
 }
 
 func pull(c *cli.Context) (err error) {
 
-	log := confLogging(c.GlobalString("l"))
-	dashboardID := c.String("id")
+	payload, err := getDashboard(c.GlobalString("dh"), c.String("id"), c.GlobalString("api-key"), c.GlobalString("app-key"))
 
-	log.Info("Pulling dashboard ", dashboardID)
+	content := beautify(payload)
 
-	query := c.GlobalString("dh") + "/api/v1/dashboard/" + dashboardID + "?api_key=" + c.GlobalString("api-key") + "&application_key=" + c.GlobalString("app-key")
-
-	resp, err := http.Get(query)
-	if err != nil {
-		log.Fatal("Error connectiong to ", query)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode == 200 {
-		body, err := ioutil.ReadAll(resp.Body)
-
-		if err != nil {
-			log.Fatal("Unable to read body of the repsonse")
-		}
-
-		dumpDashboard(string(body), c.String("o"))
-
+	if c.String("o") == "stdout" {
+		fmt.Print(string(content))
+		fmt.Print("\n")
 	} else {
-		log.Error("Returned code is not 200, it's ", resp.StatusCode)
+		dumpDashboard(content, c.String("o"))
 	}
 
 	return nil
 }
 
-func dumpDashboard(content string, filepath string) {
+// getDashboard get dashboard JSON payload from Datadog
+func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey string) (string, error) {
+
+	var (
+		body []byte
+		query string
+	)
+
+	log.Info("Pulling dashboard ", dashboardID)
+
+	query = ddEndpoint + "/api/v1/dashboard/" + dashboardID + "?api_key=" + apiKey + "&application_key=" + appKey
+
+	resp, err := http.Get(query)
+	defer resp.Body.Close()
+
+	if err != nil {
+		log.Error("Error connectiong to ", query)
+	} else {
+		if resp.StatusCode == 200 {
+			body, err = ioutil.ReadAll(resp.Body)
+
+			if err != nil {
+				log.Error("Unable to read body of the repsonse")
+			}
+
+		} else {
+			log.Error("Returned code is not 200, it's ", resp.StatusCode)
+		}
+	}
+
+	return string(body), err
+}
+
+// beautify JSON payload
+func beautify(payload string) []byte {
 
 	var (
 		output     []byte
 		prettyJSON bytes.Buffer
 	)
 
-  // Try to beautify JSON payload
+	// Try to beautify JSON payload
   // if this failed dump the raw payload
-	err := json.Indent(&prettyJSON, []byte(content), "", "\t")
+	err := json.Indent(&prettyJSON, []byte(payload), "", "\t")
 	if err == nil {
 		output = prettyJSON.Bytes()
 	} else {
 		log.Warn("JSON parse error: ", err)
-		output = []byte(content)
+		output = []byte(payload)
 	}
 
-	err = ioutil.WriteFile(filepath, output, 0600)
+	return output
+}
+
+func dumpDashboard(content []byte, filepath string) {
+
+	err := ioutil.WriteFile(filepath, content, 0600)
 	if err != nil {
 		log.Error("Error when writing to ", filepath)
 	} else {
     log.Info("Dashboard dumped into ",filepath)
   }
 
-}
-
-func confLogging(level string) *log.Logger {
-
-	var logger = log.New()
-
-	logger.SetFormatter(&log.TextFormatter{})
-	switch level {
-	case "INFO":
-		logger.SetLevel(log.InfoLevel)
-		logger.Info("Log level is ", level)
-	case "DEBUG":
-		logger.SetLevel(log.DebugLevel)
-		logger.Debug("Log level is ", level)
-	case "WARN":
-		logger.SetLevel(log.WarnLevel)
-		logger.Warn("Log level is ", level)
-	case "ERROR":
-		logger.SetLevel(log.ErrorLevel)
-		logger.Error("Log level is ", level)
-	}
-
-	return logger
 }
