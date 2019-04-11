@@ -5,12 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	// "log"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
 )
+
+func init() {
+	log.SetFormatter(&log.TextFormatter{
+			FullTimestamp: true,
+		})
+}
 
 // PullCmd pull to download dashboard configuration from Datadog.
 var PullCmd = cli.Command{
@@ -32,26 +37,34 @@ var PullCmd = cli.Command{
 
 func pull(c *cli.Context) (err error) {
 
-	payload, err := getDashboard(c.GlobalString("dh"), c.String("id"), c.GlobalString("api-key"), c.GlobalString("app-key"))
+	payload, statusCode, err := getDashboard(c.GlobalString("dh"), c.String("id"), c.GlobalString("api-key"), c.GlobalString("app-key"))
 
-	content := beautify(payload)
-
-	if c.String("o") == "stdout" {
-		fmt.Print(string(content))
-		fmt.Print("\n")
+	if err != nil  {
+		log.Error("Error when querying Datadog API.")
+	} else if statusCode != 200 {
+		log.Error("Return is not 200: ", statusCode)
 	} else {
-		dumpDashboard(content, c.String("o"))
+		content := beautify(payload)
+
+		if c.String("o") == "stdout" {
+			fmt.Print(string(content))
+			fmt.Print("\n")
+		} else {
+			dumpDashboard(content, c.String("o"))
+		}
+
 	}
 
-	return nil
+	return err
 }
 
 // getDashboard get dashboard JSON payload from Datadog
-func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey string) (string, error) {
+func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey string) (string, int, error) {
 
 	var (
-		body []byte
-		query string
+		body 				[]byte
+		query 			string
+		statusCode int
 	)
 
 	log.Info("Pulling dashboard ", dashboardID)
@@ -64,7 +77,8 @@ func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey s
 	if err != nil {
 		log.Error("Error connectiong to ", query)
 	} else {
-		if resp.StatusCode == 200 {
+		statusCode = resp.StatusCode
+		if statusCode == 200 {
 			body, err = ioutil.ReadAll(resp.Body)
 
 			if err != nil {
@@ -76,7 +90,7 @@ func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey s
 		}
 	}
 
-	return string(body), err
+	return string(body), statusCode, err
 }
 
 // beautify JSON payload
