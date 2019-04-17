@@ -13,8 +13,9 @@ import (
 
 func init() {
 	log.SetFormatter(&log.TextFormatter{
-			FullTimestamp: true,
-		})
+		FullTimestamp: true,
+	})
+
 }
 
 // PullCmd pull to download dashboard configuration from Datadog.
@@ -39,7 +40,7 @@ func pull(c *cli.Context) (err error) {
 
 	payload, statusCode, err := getDashboard(c.GlobalString("dh"), c.String("id"), c.GlobalString("api-key"), c.GlobalString("app-key"))
 
-	if err != nil  {
+	if err != nil {
 		log.Error("Error when querying Datadog API.")
 	} else if statusCode != 200 {
 		log.Error("Return is not 200: ", statusCode)
@@ -62,8 +63,8 @@ func pull(c *cli.Context) (err error) {
 func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey string) (string, int, error) {
 
 	var (
-		body 				[]byte
-		query 			string
+		body       []byte
+		query      string
 		statusCode int
 	)
 
@@ -72,11 +73,11 @@ func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey s
 	query = ddEndpoint + "/api/v1/dashboard/" + dashboardID + "?api_key=" + apiKey + "&application_key=" + appKey
 
 	resp, err := http.Get(query)
-	defer resp.Body.Close()
 
 	if err != nil {
 		log.Error("Error connectiong to ", query)
 	} else {
+		defer resp.Body.Close()
 		statusCode = resp.StatusCode
 		if statusCode == 200 {
 			body, err = ioutil.ReadAll(resp.Body)
@@ -102,7 +103,7 @@ func beautify(payload string) []byte {
 	)
 
 	// Try to beautify JSON payload
-  // if this failed dump the raw payload
+	// if this failed dump the raw payload
 	err := json.Indent(&prettyJSON, []byte(payload), "", "\t")
 	if err == nil {
 		output = prettyJSON.Bytes()
@@ -120,7 +121,7 @@ func dumpDashboard(content []byte, filepath string) {
 	if err != nil {
 		log.Error("Error when writing to ", filepath)
 	} else {
-    log.Info("Dashboard dumped into ",filepath)
-  }
+		log.Info("Dashboard dumped into ", filepath)
+	}
 
 }
