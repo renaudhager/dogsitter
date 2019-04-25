@@ -51,7 +51,8 @@ func pull(c *cli.Context) (err error) {
 			fmt.Print(string(content))
 			fmt.Print("\n")
 		} else {
-			dumpDashboard(content, c.String("o"))
+			_ = dumpDashboard(content, c.String("o"))
+
 		}
 
 	}
@@ -115,7 +116,7 @@ func beautify(payload string) []byte {
 	return output
 }
 
-func dumpDashboard(content []byte, filepath string) {
+func dumpDashboard(content []byte, filepath string) error {
 
 	err := ioutil.WriteFile(filepath, content, 0600)
 	if err != nil {
@@ -124,4 +125,5 @@ func dumpDashboard(content []byte, filepath string) {
 		log.Info("Dashboard dumped into ", filepath)
 	}
 
+	return err
 }
