@@ -1,0 +1,5 @@
+vendor/*
+coverage.out
+dogsitter
+dogsitter*
+dist/*
