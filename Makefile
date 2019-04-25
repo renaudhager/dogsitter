@@ -9,6 +9,7 @@ endif
 .PHONY: setup
 setup:
 	go get -u -v golang.org/x/lint/golint
+	go get -u -v github.com/mitchellh/gox
 	go get -u -v github.com/golang/dep/cmd/dep
 
 .PHONY: deps
@@ -24,8 +25,8 @@ lint:
 test:
 	go test -coverprofile=coverage.out -v ./...
 
-.PHONY: build-docker
+.PHONY: build
 build:
-	CGO_ENABLED=0 go build -o $(NAME) -ldflags "$(LDFLAGS)" .
-	strip $(NAME)
-	cp $(NAME) $(NAME)_$(VERSION)
+	mkdir -p dist; rm -rf dist/*
+	CGO_ENABLED=0 gox -osarch "linux/386 linux/amd64 darwin/amd64" -ldflags "$(LDFLAGS)" -output dist/$(NAME)_{{.OS}}_{{.Arch}}
+	strip dist/*_linux_amd64 dist/*_linux_386

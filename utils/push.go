@@ -89,5 +89,5 @@ func uploadDashboard(endpoint string, content []byte, apiKey string, appKey stri
 
 	log.Info("Dashboard successfully imported.")
 
-	return nil
+	return err
 }

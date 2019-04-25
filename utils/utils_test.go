@@ -30,7 +30,7 @@ func TestGetDashboardReturnError(t *testing.T) {
 	}
 }
 
-// TestGetDashboardWrongResponseStatus test function of correct management of return code
+// TestGetDashboardWrongResponseStatus test function to ensure that getDashboard() handle correctly return code
 func TestGetDashboardWrongResponseStatus(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +49,7 @@ func TestGetDashboardWrongResponseStatus(t *testing.T) {
 	}
 }
 
-// TestGetDashboardAssertRequest test function to ensure that the request send is correct
+// TestGetDashboardAssertRequest test function to ensure that getDashboard() send the correct request
 func TestGetDashboardAssertRequest(t *testing.T) {
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -60,7 +60,7 @@ func TestGetDashboardAssertRequest(t *testing.T) {
 		}
 
 		if r.RequestURI != "/api/v1/dashboard/"+dasboardID+"?api_key="+apiKey+"&application_key="+appKey {
-			t.Errorf("Did got expected uri, got '%s'", r.RequestURI)
+			t.Errorf("Did not get expected uri, got '%s'", r.RequestURI)
 		}
 
 	}))
@@ -74,6 +74,7 @@ func TestGetDashboardAssertRequest(t *testing.T) {
 	}
 }
 
+// TestDumpDashboard test function for dumpDashboard()
 func TestDumpDashboard(t *testing.T) {
 
 	expectedContentByte := []byte(expectedContent)
@@ -107,6 +108,13 @@ func TestDumpDashboard(t *testing.T) {
 			t.Errorf("dumpDashboard() content is not as expected. Expected '%s' got '%s'", string(content), expectedContent)
 		}
 
+		// Cleaning up
+		err = os.Remove(existingFilePath)
+
+		if err != nil {
+			t.Errorf("Error while cleaning up %s", existingFilePath)
+		}
+
 	} else if os.IsNotExist(err) {
 		t.Errorf("File %s has not been created", existingFilePath)
 	} else {
@@ -114,6 +122,7 @@ func TestDumpDashboard(t *testing.T) {
 	}
 }
 
+// TestDumpDashboard test function for beautify()
 func TestBeautify(t *testing.T) {
 
 	payload := `{"a":"b"}`
@@ -122,5 +131,86 @@ func TestBeautify(t *testing.T) {
 
 	if string(prettyPayload) != expectedPrettyJSON {
 		t.Errorf("beautify() return is not correct. Expected '%s', got '%s'", expectedPrettyJSON, string(prettyPayload))
+	}
+}
+
+// TestLoadDashboard test function for loadDashboard()
+func TestLoadDashboard(t *testing.T) {
+
+	notExistingFilePath := "/notexistingpath/myfile.json"
+	existingFilePath := "/tmp/dogsitter_coverage_test_file1.txt"
+
+	_, err := loadDashboard(notExistingFilePath)
+
+	if err == nil {
+		t.Errorf("loadDashboard() did not return an error")
+	}
+
+	_ = ioutil.WriteFile(existingFilePath, []byte(expectedContent), 0644)
+
+	content, err := loadDashboard(existingFilePath)
+
+	if err != nil {
+		t.Errorf("loadDashboard() did return an error while reading %s", existingFilePath)
+	}
+	if string(content) != expectedContent {
+		t.Errorf("loadDashboard() did return the expected content, expected '%s' got '%s'", content, expectedContent)
+	}
+
+	// Cleaning up
+	err = os.Remove(existingFilePath)
+
+	if err != nil {
+		t.Errorf("Error while cleaning up %s", existingFilePath)
+	}
+}
+
+// TestUploadDashboard test function for uploadDashboard() handle correctly return code.
+func TestUploadDashboardWrongResponseStatus(t *testing.T) {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+	defer ts.Close()
+
+	err := uploadDashboard(ts.URL, []byte(expectedContent), apiKey, appKey)
+
+	if err == nil {
+		t.Errorf("uploadDashboard() should have returned an error")
+	}
+}
+
+// TestUploadDashboardAssertReques test function to ensure that uploadDashboard() send the correct request
+func TestUploadDashboardAssertReques(t *testing.T) {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+
+		if r.Method != "POST" {
+			t.Errorf("Expected 'POST' request, got '%s'", r.Method)
+		}
+
+		if r.RequestURI != "/api/v2/dashboard?api_key="+apiKey+"&application_key="+appKey {
+			t.Errorf("Did got expected uri, got '%s'", r.RequestURI)
+		}
+
+		if r.Header.Get("Content-Type") != "application/json" {
+			t.Errorf("Did not get expected HEADER, got %s", r.Header)
+		}
+
+		body, _ := ioutil.ReadAll(r.Body)
+
+		if string(body) != expectedContent {
+			t.Errorf("Did not get expected body,expected '%s' got %s", expectedContent, string(body))
+		}
+
+	}))
+
+	defer ts.Close()
+
+	err := uploadDashboard(ts.URL, []byte(expectedContent), apiKey, appKey)
+
+	if err != nil {
+		t.Errorf("uploadDashboard() should not have returned an error")
 	}
 }
