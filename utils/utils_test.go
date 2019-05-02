@@ -190,7 +190,7 @@ func TestUploadDashboardAssertReques(t *testing.T) {
 			t.Errorf("Expected 'POST' request, got '%s'", r.Method)
 		}
 
-		if r.RequestURI != "/api/v2/dashboard?api_key="+apiKey+"&application_key="+appKey {
+		if r.RequestURI != "/api/v1/dashboard?api_key="+apiKey+"&application_key="+appKey {
 			t.Errorf("Did got expected uri, got '%s'", r.RequestURI)
 		}
 
@@ -200,15 +200,15 @@ func TestUploadDashboardAssertReques(t *testing.T) {
 
 		body, _ := ioutil.ReadAll(r.Body)
 
-		if string(body) != expectedContent {
-			t.Errorf("Did not get expected body,expected '%s' got %s", expectedContent, string(body))
+		if string(body) != expectedPrettyJSON {
+			t.Errorf("Did not get expected body,expected '%s' got %s", expectedPrettyJSON, string(body))
 		}
 
 	}))
 
 	defer ts.Close()
 
-	err := uploadDashboard(ts.URL, []byte(expectedContent), apiKey, appKey)
+	err := uploadDashboard(ts.URL, []byte(expectedPrettyJSON), apiKey, appKey)
 
 	if err != nil {
 		t.Errorf("uploadDashboard() should not have returned an error")

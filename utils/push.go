@@ -10,6 +10,10 @@ import (
 	"github.com/urfave/cli"
 )
 
+const (
+	userAgent = "Dogsitter"
+)
+
 func init() {
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
@@ -62,8 +66,8 @@ func loadDashboard(filepath string) ([]byte, error) {
 // uploadDashboard upload dashboard to Datadog
 func uploadDashboard(endpoint string, content []byte, apiKey string, appKey string) (err error) {
 
-	url := endpoint + "/api/v2/dashboard?api_key=" + apiKey + "&application_key=" + appKey
-	contentIO := bytes.NewBuffer([]byte(content))
+	url := endpoint + "/api/v1/dashboard?api_key=" + apiKey + "&application_key=" + appKey
+	contentIO := bytes.NewBuffer(content)
 
 	req, err := http.NewRequest("POST", url, contentIO)
 	if err != nil {
@@ -71,6 +75,7 @@ func uploadDashboard(endpoint string, content []byte, apiKey string, appKey stri
 	}
 
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("User-Agent", userAgent)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -78,6 +83,9 @@ func uploadDashboard(endpoint string, content []byte, apiKey string, appKey stri
 		log.Error("Error executing POST request:", err)
 	}
 	defer resp.Body.Close()
+
+	body, _ := ioutil.ReadAll(resp.Body)
+	log.Debug("Body response:", body)
 
 	statusCode := resp.StatusCode
 
