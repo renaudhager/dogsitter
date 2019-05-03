@@ -21,8 +21,8 @@ COMMANDS:
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
-   --api-key value                           Datadog API key [$DD_API_KEY]
-   --app-key value, --application-key value  Datadog Application key [$DD_APPLICATION_KEY]
+   --api-key value                           Datadog API key [$DATADOG_API_KEY]
+   --app-key value, --application-key value  Datadog Application key [$DATADOG_APP_KEY]
    -l value, --log-level value               Setting log level (default: "INFO") [$DS_LOGLEVEL]
    --dh value, --datadog-host value          Datadog endpoint (default: "https://app.datadoghq.eu") [$DD_HOST]
    --help, -h                                show help

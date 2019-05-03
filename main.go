@@ -21,12 +21,12 @@ func main() {
 		cli.StringFlag{
 			Name:   "api-key",
 			Usage:  "Datadog API key",
-			EnvVar: "DD_API_KEY",
+			EnvVar: "DATADOG_API_KEY",
 		},
 		cli.StringFlag{
 			Name:   "app-key, application-key",
 			Usage:  "Datadog Application key",
-			EnvVar: "DD_APPLICATION_KEY",
+			EnvVar: "DATADOG_APP_KEY",
 		},
 		cli.StringFlag{
 			Name:   "l, log-level",
