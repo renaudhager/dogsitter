@@ -7,15 +7,6 @@ clone:
     tags: true
 
 steps:
-- name: setup
-  image: golang:1.12
-  commands:
-  - make setup
-
-- name: deps
-  image: golang:1.12
-  commands:
-  - make deps
 
 - name: lint
   image: golang:1.12
