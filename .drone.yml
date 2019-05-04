@@ -1,0 +1,33 @@
+---
+kind: pipeline
+name: build
+clone:
+  git:
+    image: plugins/git
+    tags: true
+
+steps:
+- name: setup
+  image: efcloudsre/docker-ci:0.1.0
+  commands:
+  - make setup
+
+- name: deps
+  image: efcloudsre/docker-ci:0.1.0
+  commands:
+  - make deps
+
+- name: lint
+  image: efcloudsre/docker-ci:0.1.0
+  commands:
+  - make lint
+
+- name: test
+  image: efcloudsre/docker-ci:0.1.0
+  commands:
+  - make test
+
+- name: build
+  image: efcloudsre/docker-ci:0.1.0
+  commands:
+  - make build
