@@ -8,25 +8,24 @@ endif
 
 .PHONY: setup
 setup:
-	go get -u -v golang.org/x/lint/golint
-	go get -u -v github.com/mitchellh/gox
-	go get -u -v github.com/golang/dep/cmd/dep
+	GO111MODULE=on go get -u -v golang.org/x/lint/golint
+	GO111MODULE=on go get -u -v github.com/mitchellh/gox
 
 .PHONY: deps
 deps:
-	dep ensure -v
+	GO111MODULE=on go mod download
 
 .PHONY: lint
 lint:
-	golint -set_exit_status .
-	go vet ./...
+	GO111MODULE=on golint -set_exit_status .
+	GO111MODULE=on go vet ./...
 
 .PHONY: test
 test:
-	go test -coverprofile=coverage.out -v ./...
+	GO111MODULE=on go test -coverprofile=coverage.out -v ./...
 
 .PHONY: build
 build:
 	mkdir -p dist; rm -rf dist/*
-	CGO_ENABLED=0 gox -osarch "linux/386 linux/amd64 darwin/amd64" -ldflags "$(LDFLAGS)" -output dist/$(NAME)_{{.OS}}_{{.Arch}}
+	CGO_ENABLED=0 GO111MODULE=on gox -osarch "linux/386 linux/amd64 darwin/amd64" -ldflags "$(LDFLAGS)" -output dist/$(NAME)_{{.OS}}_{{.Arch}}
 	strip dist/*_linux_amd64 dist/*_linux_386

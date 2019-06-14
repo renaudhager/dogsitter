@@ -41,9 +41,6 @@ func push(c *cli.Context) (err error) {
 		log.Error("Unable to load file ", c.String("f"))
 	}
 
-	// fmt.Println(content)
-
-	// c.GlobalString("dh")
 	uploadDashboard(c.GlobalString("dh"), content, c.GlobalString("api-key"), c.GlobalString("app-key"))
 
 	return err
@@ -85,12 +82,12 @@ func uploadDashboard(endpoint string, content []byte, apiKey string, appKey stri
 	defer resp.Body.Close()
 
 	body, _ := ioutil.ReadAll(resp.Body)
-	log.Debug("Body response:", body)
 
 	statusCode := resp.StatusCode
 
 	if statusCode != 200 {
 		log.Error("Error returned is not 200:", statusCode)
+		log.Errorf("Response returned by Datadog: \n %s \n", string(body))
 		err = errors.New("Error during dashboard import")
 		return err
 	}

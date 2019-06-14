@@ -1,5 +1,7 @@
 version: 1
 update_configs:
-  - package_manager: "go:dep"
+  - package_manager: "go:modules"
     directory: "/"
     update_schedule: "daily"
+    default_reviewers:
+      - "renaudhager"
