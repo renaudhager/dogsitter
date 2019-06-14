@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.1.2] - 2019-06-14
+- Log returned error by Datadog.
+- Switch dep management to go modules.
+
 ## [0.1.1] - 2019-05-01
 - Added licence
 - Added user agent
