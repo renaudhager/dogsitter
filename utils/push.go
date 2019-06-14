@@ -2,9 +2,11 @@ package utils
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli"
@@ -63,6 +65,8 @@ func loadDashboard(filepath string) ([]byte, error) {
 // uploadDashboard upload dashboard to Datadog
 func uploadDashboard(endpoint string, content []byte, apiKey string, appKey string) (err error) {
 
+	var datadogSite string
+
 	url := endpoint + "/api/v1/dashboard?api_key=" + apiKey + "&application_key=" + appKey
 	contentIO := bytes.NewBuffer(content)
 
@@ -92,7 +96,45 @@ func uploadDashboard(endpoint string, content []byte, apiKey string, appKey stri
 		return err
 	}
 
+	// Extracting url and id of newly created dashboard
+	dashboardID, dasboardURL, err := getDashboardInfo(string(body))
+
+	if err != nil {
+		log.Error("Error when parsing returned response:", err)
+		return err
+	}
+
+	if strings.Contains(endpoint, "eu") {
+		datadogSite = "datadoghq.eu"
+	} else {
+		datadogSite = "datadoghq.com"
+	}
+
 	log.Info("Dashboard successfully imported.")
+	log.Infof("Dashboard id: %s", dashboardID)
+	log.Infof("Dashboard url: %s", "https://"+datadogSite+dasboardURL)
 
 	return err
+}
+
+// getDashboardInfo function thaty parse the JOSN returned by Datadog and extract
+// id and url of the new dashboard
+func getDashboardInfo(dashboard string) (string, string, error) {
+
+	var (
+		id  string
+		url string
+	)
+
+	m := map[string]interface{}{}
+
+	err := json.Unmarshal([]byte(dashboard), &m)
+	if err != nil {
+		return id, url, err
+	}
+
+	id = string(m["id"].(string))
+	url = string(m["url"].(string))
+
+	return id, url, nil
 }
