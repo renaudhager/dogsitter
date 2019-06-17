@@ -44,12 +44,16 @@ var ListCmd = cli.Command{
 		cli.StringFlag{
 			Name:  "format",
 			Usage: "Format of the list of dashboard.",
-			Value: "json",
+			Value: "text",
 		},
 		cli.StringFlag{
 			Name:  "o, output",
 			Usage: "output file to print dashboard list.",
 			Value: "stdout",
+		},
+		cli.StringFlag{
+			Name:  "id",
+			Usage: "Get detail for a specific dashboard.",
 		},
 	},
 }
@@ -57,13 +61,23 @@ var ListCmd = cli.Command{
 func list(c *cli.Context) (err error) {
 
 	var (
-	// dashboardList DashboardList
+		dashboardList DashboardList
 	)
 
-	_, err = getDashboardList(c.GlobalString("dh"), c.GlobalString("api-key"), c.GlobalString("app-key"))
+	dashboardList, err = getDashboardList(c.GlobalString("dh"), c.GlobalString("api-key"), c.GlobalString("app-key"))
+
+	if err != nil {
+		log.Error("Error when retrieving dashboard list.")
+		return err
+	}
+
+	output(dashboardList, c.String("format"))
+
 	return nil
 }
 
+// getDashboardList function that qeury Datadog to get list of dashboard
+// then map the result into DashboardList structure.
 func getDashboardList(ddEndpoint string, apiKey string, appKey string) (DashboardList, error) {
 
 	var (
@@ -76,7 +90,7 @@ func getDashboardList(ddEndpoint string, apiKey string, appKey string) (Dashboar
 	log.Info("Getting list of dashboards")
 
 	query = ddEndpoint + "/api/v1/dashboard?api_key=" + apiKey + "&application_key=" + appKey
-	fmt.Printf("query: %v \n", query)
+
 	resp, err := http.Get(query)
 
 	if err != nil {
@@ -107,7 +121,14 @@ func getDashboardList(ddEndpoint string, apiKey string, appKey string) (Dashboar
 		return dashboardList, errors.New("Error when unmarshalling Json to Struct")
 	}
 
-	fmt.Printf("\nlist: %v", dashboardList)
-
 	return dashboardList, nil
+}
+
+func output(dashboardList DashboardList, format string) error {
+
+	for _, dashboard := range dashboardList.Dashboards {
+		fmt.Printf("%v | %v\n", dashboard.Title, dashboard.ID)
+	}
+
+	return nil
 }
