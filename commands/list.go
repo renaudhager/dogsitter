@@ -26,7 +26,7 @@ type Dashboard struct {
 
 // DashboardList structure definition
 type DashboardList struct {
-	dashboards []Dashboard `json:"dashboards"`
+	Dashboards []Dashboard `json:"dashboards"`
 }
 
 func init() {
@@ -99,8 +99,6 @@ func getDashboardList(ddEndpoint string, apiKey string, appKey string) (Dashboar
 		log.Error("Error when reading body response. ", err)
 		return dashboardList, errors.New("Error when reading body response")
 	}
-
-	fmt.Printf("\nbody:\n%v", string(body))
 
 	err = json.Unmarshal(body, &dashboardList)
 
