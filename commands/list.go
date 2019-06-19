@@ -64,14 +64,22 @@ func list(c *cli.Context) (err error) {
 		dashboardList DashboardList
 	)
 
-	dashboardList, err = getDashboardList(c.GlobalString("dh"), c.GlobalString("api-key"), c.GlobalString("app-key"))
+	id := c.String("id")
 
-	if err != nil {
-		log.Error("Error when retrieving dashboard list.")
-		return err
+	if len(id) > 0 {
+		// Getting details for 1 dashboard
+		fmt.Printf("id: %v \n", c.String("id"))
+	} else {
+		// Getting a list off all dashboard
+		dashboardList, err = getDashboardList(c.GlobalString("dh"), c.GlobalString("api-key"), c.GlobalString("app-key"))
+
+		if err != nil {
+			log.Error("Error when retrieving dashboard list.")
+			return err
+		}
+
+		output(dashboardList, c.String("format"))
 	}
-
-	output(dashboardList, c.String("format"))
 
 	return nil
 }
@@ -126,8 +134,15 @@ func getDashboardList(ddEndpoint string, apiKey string, appKey string) (Dashboar
 
 func output(dashboardList DashboardList, format string) error {
 
-	for _, dashboard := range dashboardList.Dashboards {
-		fmt.Printf("%v | %v\n", dashboard.Title, dashboard.ID)
+	switch format {
+	case "text":
+		for _, dashboard := range dashboardList.Dashboards {
+			fmt.Printf("%v | %v\n", dashboard.Title, dashboard.ID)
+		}
+	default:
+		for _, dashboard := range dashboardList.Dashboards {
+			fmt.Printf("%v | %v\n", dashboard.Title, dashboard.ID)
+		}
 	}
 
 	return nil
