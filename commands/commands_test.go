@@ -293,3 +293,25 @@ func TestGetDashboardInfo(t *testing.T) {
 		t.Errorf("url should be empty, got %s", url)
 	}
 }
+
+// TestStripBadField function that test stripBadField()
+func TestStripBadField(t *testing.T) {
+	input := `{"a":"b","c":"d","e":"f"}`
+	expectedOutput := `{"a":"b","e":"f"}`
+
+	output, err := stripBadField([]byte(input), "c")
+
+	if err != nil {
+		t.Errorf("err should be nil, got %v", err)
+	}
+
+	if string(output) != expectedOutput {
+		t.Errorf("output should be `%v`, got `%v`", expectedOutput, string(output))
+	}
+
+	_, err = stripBadField([]byte("foo"), "c")
+
+	if err == nil {
+		t.Errorf("err should not be nil")
+	}
+}
