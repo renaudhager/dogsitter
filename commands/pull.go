@@ -92,7 +92,10 @@ func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey s
 		}
 	}
 
-	return string(body), statusCode, err
+	// Call to a function to strip a field that breaks Datadog API when the JSON is imported
+	strippedPayload, _ := stripBadField(body, "author_name")
+
+	return string(strippedPayload), statusCode, err
 }
 
 // beautify JSON payload
@@ -126,4 +129,36 @@ func dumpDashboard(content []byte, filepath string) error {
 	}
 
 	return err
+}
+
+// stripBadField function is required because Datadog is broken.
+// We need to remove field `author_name` from the payload.
+func stripBadField(payload []byte, pattern string) ([]byte, error) {
+
+	var strippedPayload []byte
+
+	m := make(map[string]interface{})
+	n := make(map[string]interface{})
+
+	err := json.Unmarshal(payload, &m)
+
+	if err != nil {
+		log.Error("Error when unmarshalling, ", err)
+		return strippedPayload, err
+	}
+
+	for k, v := range m {
+		// Removing key author_name from the payload
+		if k != pattern {
+			n[k] = v
+		}
+	}
+
+	strippedPayload, err = json.Marshal(n)
+	if err != nil {
+		log.Error("Error when marshalling, ", err)
+		return strippedPayload, err
+	}
+
+	return strippedPayload, nil
 }
