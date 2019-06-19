@@ -13,15 +13,15 @@ import (
 
 // Dashboard structure definition, mapped from Datadog type
 type Dashboard struct {
-	createdAt   string `json:"created_at"`
-	isReadOnly  bool   `json:"is_read_only"`
-	description string `json:  "description"`
-	ID          string `json: "id"`
-	Title       string `json:  "title"`
-	URL         string `json: "url"`
-	layoutType  string `json:  "layout_type"`
-	modifiedAt  string `json: "modified_at"`
-	Author      string `json: "author_handle"`
+	CreatedAt   string `json:"created_at"`
+	IsReadOnly  bool   `json:"is_read_only"`
+	Description string `json:"description"`
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	URL         string `json:"url"`
+	LayoutType  string `json:"layout_type"`
+	ModifiedAt  string `json:"modified_at"`
+	Author      string `json:"author_handle"`
 }
 
 // DashboardList structure definition
@@ -64,21 +64,26 @@ func list(c *cli.Context) (err error) {
 		dashboardList DashboardList
 	)
 
+	// Getting a list off all dashboard
+	dashboardList, err = getDashboardList(c.GlobalString("dh"), c.GlobalString("api-key"), c.GlobalString("app-key"))
+
+	if err != nil {
+		log.Error("Error when retrieving dashboard list.")
+		return err
+	}
+
 	id := c.String("id")
 
 	if len(id) > 0 {
-		// Getting details for 1 dashboard
-		fmt.Printf("id: %v \n", c.String("id"))
-	} else {
-		// Getting a list off all dashboard
-		dashboardList, err = getDashboardList(c.GlobalString("dh"), c.GlobalString("api-key"), c.GlobalString("app-key"))
-
-		if err != nil {
-			log.Error("Error when retrieving dashboard list.")
-			return err
+		var d DashboardList
+		for _, dashboard := range dashboardList.Dashboards {
+			if dashboard.ID == id {
+				d.Dashboards = append(d.Dashboards, dashboard)
+				output(d, c.String("format"), true)
+			}
 		}
-
-		output(dashboardList, c.String("format"))
+	} else {
+		output(dashboardList, c.String("format"), false)
 	}
 
 	return nil
@@ -132,13 +137,22 @@ func getDashboardList(ddEndpoint string, apiKey string, appKey string) (Dashboar
 	return dashboardList, nil
 }
 
-func output(dashboardList DashboardList, format string) error {
+func output(dashboardList DashboardList, format string, verbose bool) error {
 
 	switch format {
 	case "text":
-		for _, dashboard := range dashboardList.Dashboards {
-			fmt.Printf("%v | %v\n", dashboard.Title, dashboard.ID)
+		if verbose {
+			for _, dashboard := range dashboardList.Dashboards {
+				fmt.Printf("    Title    |    Author    |    ID   |   Description   |    Created    |    Modified\n")
+				fmt.Printf("%v | %v | %v| %v| %v| %v\n", dashboard.Title, dashboard.Author, dashboard.ID,
+					dashboard.Description, dashboard.CreatedAt, dashboard.ModifiedAt)
+			}
+		} else {
+			for _, dashboard := range dashboardList.Dashboards {
+				fmt.Printf("%v | %v\n", dashboard.Title, dashboard.ID)
+			}
 		}
+
 	default:
 		for _, dashboard := range dashboardList.Dashboards {
 			fmt.Printf("%v | %v\n", dashboard.Title, dashboard.ID)
