@@ -43,7 +43,7 @@ var ListCmd = cli.Command{
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",
-			Usage: "Format of the list of dashboard.",
+			Usage: "Format of the list of dashboard. Supported values are `text` or json.",
 			Value: "text",
 		},
 		cli.StringFlag{
@@ -64,7 +64,7 @@ func list(c *cli.Context) (err error) {
 		dashboardList DashboardList
 	)
 
-	// Getting a list off all dashboard
+	// Getting a list off all dashboards
 	dashboardList, err = getDashboardList(c.GlobalString("dh"), c.GlobalString("api-key"), c.GlobalString("app-key"))
 
 	if err != nil {
@@ -89,7 +89,7 @@ func list(c *cli.Context) (err error) {
 	return nil
 }
 
-// getDashboardList function that qeury Datadog to get list of dashboard
+// getDashboardList function that query Datadog to get list of dashboard
 // then map the result into DashboardList structure.
 func getDashboardList(ddEndpoint string, apiKey string, appKey string) (DashboardList, error) {
 
@@ -152,6 +152,9 @@ func output(dashboardList DashboardList, format string, verbose bool) error {
 				fmt.Printf("%v | %v\n", dashboard.Title, dashboard.ID)
 			}
 		}
+	case "json":
+		b, _ := json.Marshal(dashboardList)
+		fmt.Printf("%v\n", string(b))
 
 	default:
 		for _, dashboard := range dashboardList.Dashboards {
