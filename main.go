@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dogsitter/utils"
+	"dogsitter/commands"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -43,8 +43,9 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
-		utils.PullCmd,
-		utils.PushCmd,
+		commands.PullCmd,
+		commands.PushCmd,
+		commands.ListCmd,
 	}
 
 	err := app.Run(os.Args)
