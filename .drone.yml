@@ -1,0 +1,58 @@
+---
+kind: pipeline
+name: lint
+clone:
+  git:
+    image: plugins/git
+    tags: true
+
+steps:
+- name: lint
+  image: renaudhager/go-ci:0.1.1
+  commands:
+  - make deps
+  - make lint
+
+---
+kind: pipeline
+name: test
+clone:
+  git:
+    image: plugins/git
+    tags: true
+
+steps:
+- name: test
+  image: renaudhager/go-ci:0.1.1
+  commands:
+  - make deps
+  - make test
+  - /usr/local/bin/codecov.bash
+  environment:
+    CODECOV_TOKEN:
+      from_secret: CODECOV_TOKEN
+
+---
+kind: pipeline
+name: build
+clone:
+  git:
+    image: plugins/git
+    tags: true
+
+steps:
+- name: build
+  image: renaudhager/go-ci:0.1.1
+  commands:
+  - make deps
+  - make build
+
+depends_on:
+  - lint
+  - test
+
+---
+kind: signature
+hmac: 127bfb67146db3dbcbd3d777046c0e9ecbd2676c4a9324d862c8d71757b5351c
+
+...

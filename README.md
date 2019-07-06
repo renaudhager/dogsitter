@@ -1,5 +1,7 @@
 # Dogsitter
 
+[![Build Status](https://cloud.drone.io/api/badges/renaudhager/dogsitter/status.svg)](https://cloud.drone.io/renaudhager/dogsitter) [![codecov](https://codecov.io/gh/renaudhager/dogsitter/branch/master/graph/badge.svg)](https://codecov.io/gh/renaudhager/dogsitter)
+
 ## Description
 This small tool, allow to export (pull) and import (push) dashboard from/to Datadog.
 
