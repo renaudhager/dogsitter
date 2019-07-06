@@ -11,14 +11,20 @@ steps:
 - name: lint
   image: golang:1.12
   commands:
+  - make setup
+  - make deps
   - make lint
 
 - name: test
   image: golang:1.12
   commands:
+  - make setup
+  - make deps
   - make test
 
 - name: build
   image: golang:1.12
   commands:
+  - make setup
+  - make deps
   - make build
