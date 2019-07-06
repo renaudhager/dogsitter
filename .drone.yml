@@ -1,5 +1,35 @@
 ---
 kind: pipeline
+name: lint
+clone:
+  git:
+    image: plugins/git
+    tags: true
+
+steps:
+- name: lint
+  image: renaudhager/go-ci:latest
+  commands:
+  - make deps
+  - make lint
+
+---
+kind: pipeline
+name: test
+clone:
+  git:
+    image: plugins/git
+    tags: true
+
+steps:
+- name: test
+  image: renaudhager/go-ci:latest
+  commands:
+  - make deps
+  - make test
+
+---
+kind: pipeline
 name: build
 clone:
   git:
@@ -7,24 +37,12 @@ clone:
     tags: true
 
 steps:
-
-- name: lint
-  image: golang:1.12
-  commands:
-  - make setup
-  - make deps
-  - make lint
-
-- name: test
-  image: golang:1.12
-  commands:
-  - make setup
-  - make deps
-  - make test
-
 - name: build
-  image: golang:1.12
+  image: renaudhager/go-ci:latest
   commands:
-  - make setup
   - make deps
   - make build
+
+depends_on:
+  - lint
+  - test
