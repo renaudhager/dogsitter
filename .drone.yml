@@ -27,6 +27,10 @@ steps:
   commands:
   - make deps
   - make test
+  - bash <(curl -s https://codecov.io/bash)
+  environment:
+    CODECOV_TOKEN:
+      from_secret: CODECOV_TOKEN
 
 ---
 kind: pipeline
