@@ -8,7 +8,7 @@ clone:
 
 steps:
 - name: lint
-  image: renaudhager/go-ci:latest
+  image: renaudhager/go-ci:b2cfaef
   commands:
   - make deps
   - make lint
@@ -23,11 +23,11 @@ clone:
 
 steps:
 - name: test
-  image: renaudhager/go-ci:latest
+  image: renaudhager/go-ci:b2cfaef
   commands:
   - make deps
   - make test
-  - bash <(curl -s https://codecov.io/bash)
+  - /usr/local/bin/codecov.bash
   environment:
     CODECOV_TOKEN:
       from_secret: CODECOV_TOKEN
@@ -42,7 +42,7 @@ clone:
 
 steps:
 - name: build
-  image: renaudhager/go-ci:latest
+  image: renaudhager/go-ci:b2cfaef
   commands:
   - make deps
   - make build
@@ -53,6 +53,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: c8a1671445310f7e7662292164ed9a0cb034fbc9b51c282d41783c1bcc9f0079
+hmac: cc7f358bfa50620ead1f3b6bb2c8156c93735423822c409b6bb2a72da0552d50
 
 ...
