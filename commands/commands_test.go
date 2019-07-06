@@ -315,3 +315,46 @@ func TestStripBadField(t *testing.T) {
 		t.Errorf("err should not be nil")
 	}
 }
+
+// TestDeleteDashboard test function to for deleteDashboard()
+func TestDeleteDashboard(t *testing.T) {
+
+	// Test when response is succesfull
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		if r.Method != "DELETE" {
+			t.Errorf("Expected 'DELTET' request, got '%s'", r.Method)
+		}
+
+		if r.RequestURI != "/api/v1/dashboard/"+dasboardID+"?api_key="+apiKey+"&application_key="+appKey {
+			t.Errorf("Did got expected uri, got '%s'", r.RequestURI)
+		}
+
+		w.Write([]byte(datadogSuccessfullResponse))
+
+	}))
+
+	defer ts.Close()
+
+	err := deleteDashboard(ts.URL, dasboardID, apiKey, appKey)
+
+	if err != nil {
+		t.Errorf("deleteDashboard() should not have returned an error: %v", err)
+	}
+
+	// Test when response is unsuccesfull
+	ts = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		w.WriteHeader(http.StatusNotFound)
+
+	}))
+
+	defer ts.Close()
+
+	err = deleteDashboard(ts.URL, dasboardID, apiKey, appKey)
+
+	if err == nil {
+		t.Errorf("deleteDashboard() should have returned an error")
+	}
+
+}
