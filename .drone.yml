@@ -46,3 +46,7 @@ steps:
 depends_on:
   - lint
   - test
+
+---
+kind: signature
+hmac: 0b30a65ab246855de68482ae56d1444a293ab6d8c74c35bc9e3d5c4a8dd86112
