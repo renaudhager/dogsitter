@@ -43,9 +43,10 @@ func main() {
 	}
 
 	app.Commands = []cli.Command{
+		commands.DeleteCmd,
+		commands.ListCmd,
 		commands.PullCmd,
 		commands.PushCmd,
-		commands.ListCmd,
 	}
 
 	err := app.Run(os.Args)
