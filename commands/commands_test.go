@@ -1,10 +1,12 @@
 package commands
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -47,6 +49,12 @@ const (
 		"author_handle": "renaud.hager@nospam.com"
 	}
 `)
+	datadogSuccessfullDashboardListResponse = (`{"dashboards":[{"created_at":"2019-04-03T18:27:49.044613+00:00","author_handle":"renaud.hager@spam.com","is_read_only":false,"description":"","title":"SRE - Kubernetes","url":"/dashboard/hfy-m49-ps3/sre---kubernetes","layout_type":"free","modified_at":"2019-06-25T10:35:08.574408+00:00","id":"hfy-m49-ps3"},{"created_at":"2019-02-27T12:03:28.403848+00:00","author_handle":"renaud.hager@spam.com","is_read_only":false,"description":"created by renaud.hager@spam.com (cloned)","title":"SRE - Vault Overview","url":"/dashboard/hyv-dzi-xas/sre---vault-overview","layout_type":"ordered","modified_at":"2019-06-19T23:39:20.305904+00:00","id":"hyv-dzi-xas"}]}`)
+	expectedJSONOutput                      = `{"dashboards":[{"created_at":"2019-04-03T18:27:49.044613+00:00","is_read_only":false,"description":"","id":"hfy-m49-ps3","title":"SRE - Kubernetes","url":"/dashboard/hfy-m49-ps3/sre---kubernetes","layout_type":"free","modified_at":"2019-06-25T10:35:08.574408+00:00","author_handle":"renaud.hager@spam.com"},{"created_at":"2019-02-27T12:03:28.403848+00:00","is_read_only":false,"description":"created by renaud.hager@spam.com (cloned)","id":"hyv-dzi-xas","title":"SRE - Vault Overview","url":"/dashboard/hyv-dzi-xas/sre---vault-overview","layout_type":"ordered","modified_at":"2019-06-19T23:39:20.305904+00:00","author_handle":"renaud.hager@spam.com"}]}
+`
+	expectedTextOutput = `SRE - Kubernetes | hfy-m49-ps3
+SRE - Vault Overview | hyv-dzi-xas
+`
 )
 
 // TestGetDashboard test function and expect an error
@@ -71,7 +79,7 @@ func TestGetDashboardWrongResponseStatus(t *testing.T) {
 	_, statusCode, err := getDashboard(ts.URL, dasboardID, apiKey, appKey)
 
 	if err != nil {
-		t.Errorf("getDashboard() should not have return an error")
+		t.Errorf("getDashboard() should not have returned an error")
 	}
 
 	if statusCode != 503 {
@@ -100,7 +108,7 @@ func TestGetDashboardAssertRequest(t *testing.T) {
 	_, _, err := getDashboard(ts.URL, dasboardID, apiKey, appKey)
 
 	if err != nil {
-		t.Errorf("getDashboard() should not have return an error")
+		t.Errorf("getDashboard() should not have returned an error")
 	}
 }
 
@@ -316,7 +324,7 @@ func TestStripBadField(t *testing.T) {
 	}
 }
 
-// TestDeleteDashboard test function to for deleteDashboard()
+// TestDeleteDashboard test function for deleteDashboard()
 func TestDeleteDashboard(t *testing.T) {
 
 	// Test when response is succesfull
@@ -342,8 +350,12 @@ func TestDeleteDashboard(t *testing.T) {
 		t.Errorf("deleteDashboard() should not have returned an error: %v", err)
 	}
 
-	// Test when response is unsuccesfull
-	ts = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+}
+
+// TestDeleteDashboard test for deleteDashboard() when response is unsuccesfull
+func TestDeleteDashboardWrongResponseStatus(t *testing.T) {
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusNotFound)
 
@@ -351,10 +363,109 @@ func TestDeleteDashboard(t *testing.T) {
 
 	defer ts.Close()
 
-	err = deleteDashboard(ts.URL, dasboardID, apiKey, appKey)
+	err := deleteDashboard(ts.URL, dasboardID, apiKey, appKey)
 
 	if err == nil {
 		t.Errorf("deleteDashboard() should have returned an error")
 	}
+}
 
+// TestGetDashboardList test function for getDashboardList()
+func TestGetDashboardList(t *testing.T) {
+	var expectedDashboardList DashboardList
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+
+		if r.Method != "GET" {
+			t.Errorf("Expected 'GET' request, got '%s'", r.Method)
+		}
+
+		if r.RequestURI != "/api/v1/dashboard?api_key="+apiKey+"&application_key="+appKey {
+			t.Errorf("Did not get expected uri, got '%s'", r.RequestURI)
+		}
+
+		w.Write([]byte(datadogSuccessfullDashboardListResponse))
+
+	}))
+
+	defer ts.Close()
+
+	dashboardList, err := getDashboardList(ts.URL, apiKey, appKey)
+
+	if err != nil {
+		t.Errorf("getDashboardList() should not have returned an error")
+	}
+
+	_ = json.Unmarshal([]byte(datadogSuccessfullDashboardListResponse), &expectedDashboardList)
+
+	if !reflect.DeepEqual(dashboardList, expectedDashboardList) {
+		t.Errorf("getDashboardList() did not return the right list")
+	}
+
+}
+
+// TestGetDashboardList test function for getDashboardList() when response is unsuccesfull
+func TestGetDashboardListWrongResponseStatus(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusServiceUnavailable)
+	}))
+
+	defer ts.Close()
+
+	_, err := getDashboardList(ts.URL, apiKey, appKey)
+
+	if err == nil {
+		t.Errorf("getDashboardList() should have returned an error")
+	}
+}
+
+// TestOutput test function for output() with text format
+func TestOutputTextFormat(t *testing.T) {
+	var dashboardList DashboardList
+
+	_ = json.Unmarshal([]byte(datadogSuccessfullDashboardListResponse), &dashboardList)
+
+	previousStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := output(dashboardList, "text", false)
+
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = previousStdout
+
+	if err != nil {
+		t.Errorf("output() should not have returned an error")
+	}
+
+	if string(out) != expectedTextOutput {
+		t.Errorf("output() did not print the expected information. Expected \n%v\n, got \n%v\n", expectedTextOutput, string(out))
+	}
+}
+
+// TestOutput test function for output() with text format
+func TestOutputJsonFormat(t *testing.T) {
+	var dashboardList DashboardList
+
+	_ = json.Unmarshal([]byte(datadogSuccessfullDashboardListResponse), &dashboardList)
+
+	previousStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := output(dashboardList, "json", false)
+
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = previousStdout
+
+	if err != nil {
+		t.Errorf("output() should not have returned an error")
+	}
+
+	if string(out) != expectedJSONOutput {
+		t.Errorf("output() did not print the expected information. Expected \n%v\n, got \n%v\n", expectedJSONOutput, string(out))
+	}
 }
