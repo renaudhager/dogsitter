@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 This project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2019-07-07
+- Added a delete command.
+- Improved unit tests.
+- Improved CI pipeline.
+- Sent unit test coverage result to codecov.io.
+- Automated Github release creation.
+- Updated README.md.
+
 ## [0.1.3] - 2019-07-04
 - Added a function to strip a field from the JSON returned by Datadog.
 - Added a command to list existing dashboard.
