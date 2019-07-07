@@ -57,13 +57,13 @@ func pull(c *cli.Context) (err error) {
 		fmt.Print(string(content))
 		fmt.Print("\n")
 	} else {
-		_ = dumpDashboard(content, c.String("o"))
-
+		err = dumpDashboard(content, c.String("o"))
+		if err != nil {
+			return errors.New("Cannot dump the dashboard")
+		}
 	}
 
-	// }
-
-	return err
+	return nil
 }
 
 // getDashboard get dashboard JSON payload from Datadog

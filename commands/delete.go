@@ -30,7 +30,7 @@ var DeleteCmd = cli.Command{
 
 func delete(c *cli.Context) (err error) {
 
-	_ = deleteDashboard(c.GlobalString("dh"), c.String("id"), c.GlobalString("api-key"), c.GlobalString("app-key"))
+	err = deleteDashboard(c.GlobalString("dh"), c.String("id"), c.GlobalString("api-key"), c.GlobalString("app-key"))
 	return err
 }
 

@@ -41,9 +41,10 @@ func push(c *cli.Context) (err error) {
 	content, err := loadDashboard(c.String("f"))
 	if err != nil {
 		log.Error("Unable to load file ", c.String("f"))
+		return err
 	}
 
-	uploadDashboard(c.GlobalString("dh"), content, c.GlobalString("api-key"), c.GlobalString("app-key"))
+	err = uploadDashboard(c.GlobalString("dh"), content, c.GlobalString("api-key"), c.GlobalString("app-key"))
 
 	return err
 }
