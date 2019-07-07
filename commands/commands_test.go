@@ -60,6 +60,11 @@ const (
 	expectedTextOutput = `SRE - Kubernetes | hfy-m49-ps3
 SRE - Vault Overview | hyv-dzi-xas
 `
+	expectedTextVerboseOutput = `    Title    |    Author    |    ID   |   Description   |    Created    |    Modified
+SRE - Kubernetes | renaud.hager@spam.com | hfy-m49-ps3| | 2019-04-03T18:27:49.044613+00:00| 2019-06-25T10:35:08.574408+00:00
+    Title    |    Author    |    ID   |   Description   |    Created    |    Modified
+SRE - Vault Overview | renaud.hager@spam.com | hyv-dzi-xas| created by renaud.hager@spam.com (cloned)| 2019-02-27T12:03:28.403848+00:00| 2019-06-19T23:39:20.305904+00:00
+`
 )
 
 // TestGetDashboard test function and expect an error
@@ -456,6 +461,31 @@ func TestOutputTextFormat(t *testing.T) {
 	}
 }
 
+// TestOutputTextFormatVerbose test function for output() with text format and verbosity enabled
+func TestOutputTextFormatVerbose(t *testing.T) {
+	var dashboardList DashboardList
+
+	_ = json.Unmarshal([]byte(datadogSuccessfullDashboardListResponse), &dashboardList)
+
+	previousStdout := os.Stdout
+	r, w, _ := os.Pipe()
+	os.Stdout = w
+
+	err := output(dashboardList, "text", true)
+
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = previousStdout
+
+	if err != nil {
+		t.Errorf("output() should not have returned an error")
+	}
+
+	if string(out) != expectedTextVerboseOutput {
+		t.Errorf("output() did not print the expected information. Expected \n%v\n, got \n%v\n", expectedTextVerboseOutput, string(out))
+	}
+}
+
 // TestOutput test function for output() with text format
 func TestOutputJsonFormat(t *testing.T) {
 	var dashboardList DashboardList
@@ -626,6 +656,25 @@ func TestPullKO(t *testing.T) {
 	context := cli.NewContext(nil, set, nil)
 
 	err := pull(context)
+
+	if err == nil {
+		t.Errorf("pull() should have returned an error")
+	}
+
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+	}))
+
+	defer ts.Close()
+
+	set2 := flag.NewFlagSet("test2", 0)
+	set2.String("dh", ts.URL, "doc")
+	set2.String("api-key", apiKey, "doc")
+	set2.String("app-key", appKey, "doc")
+
+	context2 := cli.NewContext(nil, set, nil)
+
+	err = pull(context2)
 
 	if err == nil {
 		t.Errorf("pull() should have returned an error")
