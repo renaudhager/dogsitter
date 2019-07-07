@@ -29,3 +29,7 @@ build:
 	mkdir -p dist; rm -rf dist/*
 	CGO_ENABLED=0 GO111MODULE=on gox -osarch "linux/386 linux/amd64 darwin/amd64" -ldflags "$(LDFLAGS)" -output dist/$(NAME)_{{.OS}}_{{.Arch}}
 	strip dist/*_linux_amd64 dist/*_linux_386
+
+.PHONY: release
+release:
+	/usr/local/bin/publish_release.bash

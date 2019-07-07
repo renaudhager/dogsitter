@@ -8,7 +8,7 @@ clone:
 
 steps:
 - name: lint
-  image: renaudhager/go-ci:0.1.1
+  image: renaudhager/go-ci:0.1.3
   commands:
   - make deps
   - make lint
@@ -23,7 +23,7 @@ clone:
 
 steps:
 - name: test
-  image: renaudhager/go-ci:0.1.1
+  image: renaudhager/go-ci:0.1.3
   commands:
   - make deps
   - make test
@@ -42,7 +42,7 @@ clone:
 
 steps:
 - name: build
-  image: renaudhager/go-ci:0.1.1
+  image: renaudhager/go-ci:0.1.3
   commands:
   - make deps
   - make build
@@ -52,7 +52,37 @@ depends_on:
   - test
 
 ---
+kind: pipeline
+name: release
+clone:
+  git:
+    image: plugins/git
+    tags: true
+
+steps:
+- name: create release
+  image: renaudhager/go-ci:0.1.3
+  commands:
+  - make release
+  environment:
+    GITHUB_USER: "renaudhager"
+    GITHUB_TOKEN:
+      from_secret: GITHUB_TOKEN
+
+depends_on:
+  - lint
+  - test
+  - build
+
+when:
+    branch:
+    - master
+
+trigger:
+  event:
+    - tag
+---
 kind: signature
-hmac: 127bfb67146db3dbcbd3d777046c0e9ecbd2676c4a9324d862c8d71757b5351c
+hmac: 2b636f762d9b9b2f2f3e6dcc28958619f74461383dcb7ed64671017b26ea703d
 
 ...
