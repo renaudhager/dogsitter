@@ -107,7 +107,7 @@ func getDashboardList(ddEndpoint string, apiKey string, appKey string) (Dashboar
 	resp, err := http.Get(query)
 
 	if err != nil {
-		log.Error("Error connectiong to ", query)
+		log.Error("Error connection to ", query)
 		return dashboardList, err
 	}
 

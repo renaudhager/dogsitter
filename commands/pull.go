@@ -82,7 +82,7 @@ func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey s
 	resp, err := http.Get(query)
 
 	if err != nil {
-		log.Error("Error connectiong to ", query)
+		log.Error("Error connection to ", query)
 		return "", 500, err
 	}
 
@@ -98,7 +98,7 @@ func getDashboard(ddEndpoint string, dashboardID string, apiKey string, appKey s
 	body, err = ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		log.Error("Unable to read body of the repsonse")
+		log.Error("Unable to read body of the response")
 		return "", 500, err
 	}
 

@@ -63,6 +63,6 @@ func deleteDashboard(ddEndpoint string, dasboardID string, apiKey string, appKey
 		return errors.New("Returned code is not 200")
 	}
 
-	log.Info("Succesfully deleted dashboard ", dasboardID)
+	log.Info("Successfully deleted dashboard ", dasboardID)
 	return nil
 }

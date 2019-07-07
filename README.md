@@ -1,6 +1,6 @@
 # Dogsitter
 
-[![Build Status](https://cloud.drone.io/api/badges/renaudhager/dogsitter/status.svg)](https://cloud.drone.io/renaudhager/dogsitter) [![codecov](https://codecov.io/gh/renaudhager/dogsitter/branch/master/graph/badge.svg)](https://codecov.io/gh/renaudhager/dogsitter)
+[![Build Status](https://cloud.drone.io/api/badges/renaudhager/dogsitter/status.svg)](https://cloud.drone.io/renaudhager/dogsitter) [![Go Report Card](https://goreportcard.com/badge/github.com/renaudhager/dogsitter)](https://goreportcard.com/report/github.com/renaudhager/dogsitter) [![codecov](https://codecov.io/gh/renaudhager/dogsitter/branch/master/graph/badge.svg)](https://codecov.io/gh/renaudhager/dogsitter)
 
 ## Description
 This small tool, allow to manipulate dashboard from Datadog.
