@@ -3,7 +3,7 @@
 [![Build Status](https://cloud.drone.io/api/badges/renaudhager/dogsitter/status.svg)](https://cloud.drone.io/renaudhager/dogsitter) [![codecov](https://codecov.io/gh/renaudhager/dogsitter/branch/master/graph/badge.svg)](https://codecov.io/gh/renaudhager/dogsitter)
 
 ## Description
-This small tool, allow to export (pull) and import (push) dashboard from/to Datadog.
+This small tool, allow to manipulate dashboard from Datadog.
 
 ## Usage
 ```
@@ -14,10 +14,9 @@ NAME:
 USAGE:
    CLI tool to import and export Datadog dashboard. [global options] command [command options] [arguments...]
 
-VERSION:
-   0.1.0
-
 COMMANDS:
+     delete   Delete dashboard from Datadog.
+     list     List dashboard existing in Datadog.
      pull     Pull dashboard configuration from Datadog API
      push     Import dashboard configuration to Datadog.
      help, h  Shows a list of commands or help for one command
@@ -45,7 +44,7 @@ OPTIONS:
    -o value, --output value  output file for JSON payload. (default: "stdout")
 ```
 
-### Push
+### Push command
 ```
 $ dogsitter push -h
 NAME:
@@ -56,4 +55,32 @@ USAGE:
 
 OPTIONS:
    -f value, --file value  Dashboard file configuration. [$DS_IMPORT_FILE]
+```
+
+### List command
+```
+$ dogsitter list -h
+NAME:
+   CLI tool to import and export Datadog dashboard. list - List dashboard existing in Datadog.
+
+USAGE:
+   CLI tool to import and export Datadog dashboard. list [command options] [arguments...]
+
+OPTIONS:
+   --format text             Format of the list of dashboard. Supported values are text or json. (default: "text")
+   -o value, --output value  output file to print dashboard list. (default: "stdout")
+   --id value                Get detail for a specific dashboard.
+```
+
+### Delete command
+```
+$ dogsitter delete -h
+NAME:
+   CLI tool to import and export Datadog dashboard. delete - Delete dashboard from Datadog.
+
+USAGE:
+   CLI tool to import and export Datadog dashboard. delete [command options] [arguments...]
+
+OPTIONS:
+   --id value  Dashboard id.
 ```
