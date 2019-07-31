@@ -16,6 +16,22 @@ const (
 	userAgent = "Dogsitter"
 )
 
+// Push interface
+type Push interface {
+	push(c *cli.Context) (err error)
+	loadDashboard(filepath string) ([]byte, error)
+	uploadDashboard(endpoint string, content []byte, apiKey string, appKey string) (err error)
+	getDashboardInfo(dashboard string) (string, string, error)
+}
+
+// PushAction struct
+type PushAction struct{}
+
+// NewPushAction constructor for PushAction
+func NewPushAction() Push {
+	return &PushAction{}
+}
+
 func init() {
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
@@ -26,7 +42,7 @@ func init() {
 var PushCmd = cli.Command{
 	Name:   "push",
 	Usage:  "Import dashboard configuration to Datadog.",
-	Action: push,
+	Action: actionPush,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:   "f, file",
@@ -36,21 +52,26 @@ var PushCmd = cli.Command{
 	},
 }
 
-func push(c *cli.Context) (err error) {
+// actionPush placeholder function
+func actionPush(c *cli.Context) (err error) {
+	return NewPushAction().push(c)
+}
 
-	content, err := loadDashboard(c.String("f"))
+func (pa *PushAction) push(c *cli.Context) (err error) {
+
+	content, err := pa.loadDashboard(c.String("f"))
 	if err != nil {
 		log.Error("Unable to load file ", c.String("f"))
 		return err
 	}
 
-	err = uploadDashboard(c.GlobalString("dh"), content, c.GlobalString("api-key"), c.GlobalString("app-key"))
+	err = pa.uploadDashboard(c.GlobalString("dh"), content, c.GlobalString("api-key"), c.GlobalString("app-key"))
 
 	return err
 }
 
 // loadDashboard load a file into a string
-func loadDashboard(filepath string) ([]byte, error) {
+func (pa *PushAction) loadDashboard(filepath string) ([]byte, error) {
 
 	content, err := ioutil.ReadFile(filepath)
 
@@ -64,7 +85,7 @@ func loadDashboard(filepath string) ([]byte, error) {
 }
 
 // uploadDashboard upload dashboard to Datadog
-func uploadDashboard(endpoint string, content []byte, apiKey string, appKey string) (err error) {
+func (pa *PushAction) uploadDashboard(endpoint string, content []byte, apiKey string, appKey string) (err error) {
 
 	var datadogSite string
 
@@ -98,7 +119,7 @@ func uploadDashboard(endpoint string, content []byte, apiKey string, appKey stri
 	}
 
 	// Extracting url and id of newly created dashboard
-	dashboardID, dasboardURL, err := getDashboardInfo(string(body))
+	dashboardID, dasboardURL, err := pa.getDashboardInfo(string(body))
 
 	if err != nil {
 		log.Error("Error when parsing returned response:", err)
@@ -120,7 +141,7 @@ func uploadDashboard(endpoint string, content []byte, apiKey string, appKey stri
 
 // getDashboardInfo function thaty parse the JOSN returned by Datadog and extract
 // id and url of the new dashboard
-func getDashboardInfo(dashboard string) (string, string, error) {
+func (pa *PushAction) getDashboardInfo(dashboard string) (string, string, error) {
 
 	var (
 		id  string
