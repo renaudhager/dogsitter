@@ -9,6 +9,19 @@ import (
 	"github.com/urfave/cli"
 )
 
+// Delete interface
+type Delete interface {
+	deleteDashboard(c *cli.Context) error
+}
+
+// DeleteAction struct
+type DeleteAction struct{}
+
+// NewDeleteAction constructor for DeleteAction
+func NewDeleteAction() Delete {
+	return &DeleteAction{}
+}
+
 func init() {
 	log.SetFormatter(&log.TextFormatter{
 		FullTimestamp: true,
@@ -19,7 +32,7 @@ func init() {
 var DeleteCmd = cli.Command{
 	Name:   "delete",
 	Usage:  "Delete dashboard from Datadog.",
-	Action: delete,
+	Action: actionDelete,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "id",
@@ -28,13 +41,17 @@ var DeleteCmd = cli.Command{
 	},
 }
 
-func delete(c *cli.Context) (err error) {
-
-	err = deleteDashboard(c.GlobalString("dh"), c.String("id"), c.GlobalString("api-key"), c.GlobalString("app-key"))
-	return err
+// actionDelete placeholder function
+func actionDelete(c *cli.Context) (err error) {
+	return NewDeleteAction().deleteDashboard(c)
 }
 
-func deleteDashboard(ddEndpoint string, dasboardID string, apiKey string, appKey string) error {
+func (da *DeleteAction) deleteDashboard(c *cli.Context) error {
+
+	ddEndpoint := c.GlobalString("dh")
+	dasboardID := c.String("id")
+	apiKey := c.GlobalString("api-key")
+	appKey := c.GlobalString("app-key")
 
 	client := http.Client{}
 

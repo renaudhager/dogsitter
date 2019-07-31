@@ -11,6 +11,21 @@ import (
 	"github.com/urfave/cli"
 )
 
+// List interface
+type List interface {
+	list(c *cli.Context) (err error)
+	getDashboardList(ddEndpoint string, apiKey string, appKey string) (DashboardList, error)
+	output(dashboardList DashboardList, format string, verbose bool) error
+}
+
+// ListAction struct
+type ListAction struct{}
+
+// NewListAction constructor for DeleteAction
+func NewListAction() List {
+	return &ListAction{}
+}
+
 // Dashboard structure definition, mapped from Datadog type
 type Dashboard struct {
 	CreatedAt   string `json:"created_at"`
@@ -39,7 +54,7 @@ func init() {
 var ListCmd = cli.Command{
 	Name:   "list",
 	Usage:  "List dashboard existing in Datadog.",
-	Action: list,
+	Action: actionList,
 	Flags: []cli.Flag{
 		cli.StringFlag{
 			Name:  "format",
@@ -58,14 +73,19 @@ var ListCmd = cli.Command{
 	},
 }
 
-func list(c *cli.Context) (err error) {
+// actionDelete placeholder function
+func actionList(c *cli.Context) (err error) {
+	return NewListAction().list(c)
+}
+
+func (la *ListAction) list(c *cli.Context) (err error) {
 
 	var (
 		dashboardList DashboardList
 	)
 
 	// Getting a list off all dashboards
-	dashboardList, err = getDashboardList(c.GlobalString("dh"), c.GlobalString("api-key"), c.GlobalString("app-key"))
+	dashboardList, err = la.getDashboardList(c.GlobalString("dh"), c.GlobalString("api-key"), c.GlobalString("app-key"))
 
 	if err != nil {
 		log.Error("Error when retrieving dashboard list.")
@@ -79,11 +99,11 @@ func list(c *cli.Context) (err error) {
 		for _, dashboard := range dashboardList.Dashboards {
 			if dashboard.ID == id {
 				d.Dashboards = append(d.Dashboards, dashboard)
-				output(d, c.String("format"), true)
+				la.output(d, c.String("format"), true)
 			}
 		}
 	} else {
-		output(dashboardList, c.String("format"), false)
+		la.output(dashboardList, c.String("format"), false)
 	}
 
 	return nil
@@ -91,7 +111,7 @@ func list(c *cli.Context) (err error) {
 
 // getDashboardList function that query Datadog to get list of dashboard
 // then map the result into DashboardList structure.
-func getDashboardList(ddEndpoint string, apiKey string, appKey string) (DashboardList, error) {
+func (la *ListAction) getDashboardList(ddEndpoint string, apiKey string, appKey string) (DashboardList, error) {
 
 	var (
 		dashboardList DashboardList
@@ -137,7 +157,7 @@ func getDashboardList(ddEndpoint string, apiKey string, appKey string) (Dashboar
 	return dashboardList, nil
 }
 
-func output(dashboardList DashboardList, format string, verbose bool) error {
+func (la *ListAction) output(dashboardList DashboardList, format string, verbose bool) error {
 
 	switch format {
 	case "text":
