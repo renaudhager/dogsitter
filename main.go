@@ -47,6 +47,7 @@ func main() {
 		commands.ListCmd,
 		commands.PullCmd,
 		commands.PushCmd,
+		commands.ReplaceCmd,
 	}
 
 	err := app.Run(os.Args)
