@@ -3,84 +3,84 @@
 [![Build Status](https://cloud.drone.io/api/badges/renaudhager/dogsitter/status.svg)](https://cloud.drone.io/renaudhager/dogsitter) [![Go Report Card](https://goreportcard.com/badge/github.com/renaudhager/dogsitter)](https://goreportcard.com/report/github.com/renaudhager/dogsitter) [![codecov](https://codecov.io/gh/renaudhager/dogsitter/branch/master/graph/badge.svg)](https://codecov.io/gh/renaudhager/dogsitter)
 
 ## Description
-This small tool, allow to manipulate dashboard from Datadog.
+A small command-line tool to manipulate Datadog dashboards.
 
 ## Usage
 ```
 $ dogsitter
 NAME:
-   dogsitter - A new cli application
+   dogsitter - manipulate Datadog dashboards
 
 USAGE:
-   CLI tool to import and export Datadog dashboard. [global options] command [command options] [arguments...]
+   CLI tool to manipulate Datadog dashboards. [global options] command [command options] [arguments...]
 
 COMMANDS:
-     delete   Delete dashboard from Datadog.
-     list     List dashboard existing in Datadog.
-     pull     Pull dashboard configuration from Datadog API
-     push     Import dashboard configuration to Datadog.
+     delete   Delete a dashboard
+     list     List the dashboards
+     pull     Retrieve a dashboard configuraton
+     push     Upload a dashboard configuration
      help, h  Shows a list of commands or help for one command
 
 GLOBAL OPTIONS:
    --api-key value                           Datadog API key [$DATADOG_API_KEY]
    --app-key value, --application-key value  Datadog Application key [$DATADOG_APP_KEY]
-   -l value, --log-level value               Setting log level (default: "INFO") [$DS_LOGLEVEL]
+   -l value, --log-level value               Log level (default: "INFO") [$DS_LOGLEVEL]
    --dh value, --datadog-host value          Datadog endpoint (default: "https://app.datadoghq.eu") [$DD_HOST]
-   --help, -h                                show help
-   --version, -v                             print the version
+   --help, -h                                Show help
+   --version, -v                             Print the version
 ```
 
 ### Pull command
 ```
 $ dogsitter pull -h
 NAME:
-   CLI tool to import and export Datadog dashboard. pull - Pull dashboard configuration from Datadog API
+   CLI tool to manipulate Datadog dashboards. pull - Retreive dashboard configuration from the Datadog API.
 
 USAGE:
-   CLI tool to import and export Datadog dashboard. pull [command options] [arguments...]
+   CLI tool to manipulate Datadog dashboards. pull [command options] [arguments...]
 
 OPTIONS:
-   --id value                id of dashboard
-   -o value, --output value  output file for JSON payload. (default: "stdout")
+   --id value                ID of dashboard
+   -o value, --output value  Output file for JSON payload (default: "stdout")
 ```
 
 ### Push command
 ```
 $ dogsitter push -h
 NAME:
-   CLI tool to import and export Datadog dashboard. push - Import dashboard configuration to Datadog.
+   CLI tool to manipulate Datadog dashboards. push - Upload dashboard configuration to Datadog.
 
 USAGE:
-   CLI tool to import and export Datadog dashboard. push [command options] [arguments...]
+   CLI tool to manipulate Datadog dashboards. push [command options] [arguments...]
 
 OPTIONS:
-   -f value, --file value  Dashboard file configuration. [$DS_IMPORT_FILE]
+   -f value, --file value  File to read configuration from [$DS_IMPORT_FILE]
 ```
 
 ### List command
 ```
 $ dogsitter list -h
 NAME:
-   CLI tool to import and export Datadog dashboard. list - List dashboard existing in Datadog.
+   CLI tool to manipulate Datadog dashboards. list - List existing dashboards in Datadog.
 
 USAGE:
-   CLI tool to import and export Datadog dashboard. list [command options] [arguments...]
+   CLI tool to manipulate Datadog dashboards. list [command options] [arguments...]
 
 OPTIONS:
-   --format text             Format of the list of dashboard. Supported values are text or json. (default: "text")
-   -o value, --output value  output file to print dashboard list. (default: "stdout")
-   --id value                Get detail for a specific dashboard.
+   --format text             Output format. Supported values are "text or "json" (default: "text")
+   -o value, --output value  Output file (default: "stdout")
+   --id value                Get details for a specific dashboard
 ```
 
 ### Delete command
 ```
 $ dogsitter delete -h
 NAME:
-   CLI tool to import and export Datadog dashboard. delete - Delete dashboard from Datadog.
+   CLI tool to manipulate Datadog dashboards. delete - Delete dashboard from Datadog.
 
 USAGE:
-   CLI tool to import and export Datadog dashboard. delete [command options] [arguments...]
+   CLI tool to manipulate Datadog dashboards. delete [command options] [arguments...]
 
 OPTIONS:
-   --id value  Dashboard id.
+   --id value  Dashboard ID
 ```
