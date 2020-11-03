@@ -6,7 +6,7 @@ require (
 	github.com/hashicorp/go-version v1.2.0 // indirect
 	github.com/mitchellh/gox v1.0.1 // indirect
 	github.com/sirupsen/logrus v1.4.2
-	github.com/urfave/cli v1.22.4
+	github.com/urfave/cli v1.22.5
 	golang.org/x/crypto v0.0.0-20190611184440-5c40567a22f8 // indirect
 	golang.org/x/lint v0.0.0-20190409202823-959b441ac422 // indirect
 	golang.org/x/net v0.0.0-20190613194153-d28f0bde5980 // indirect
