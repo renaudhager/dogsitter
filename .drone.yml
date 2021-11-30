@@ -8,7 +8,7 @@ clone:
 
 steps:
 - name: lint
-  image: renaudhager/go-ci:0.1.3
+  image: renaudhager/go-ci:0.1.4
   commands:
   - make deps
   - make lint
@@ -23,7 +23,7 @@ clone:
 
 steps:
 - name: test
-  image: renaudhager/go-ci:0.1.3
+  image: renaudhager/go-ci:0.1.4
   commands:
   - make deps
   - make test
@@ -42,12 +42,12 @@ clone:
 
 steps:
 - name: build
-  image: renaudhager/go-ci:0.1.3
+  image: renaudhager/go-ci:0.1.4
   commands:
   - make deps
   - make build
 - name: create release
-  image: renaudhager/go-ci:0.1.3
+  image: renaudhager/go-ci:0.1.4
   commands:
   - make release
   environment:
